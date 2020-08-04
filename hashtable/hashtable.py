@@ -8,6 +8,17 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
+    def __repr__(self):
+        return f"key = {self.key}, value = {self.value}, next = {self.next}"
+
+
+class SinglyLinkedList:
+    def __init__(self, first_node=None):
+        self.head = first_node
+
+    def __repr__(self):
+        return f"head = {self.head}"
+
 
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
@@ -43,15 +54,12 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
-        # return the total number of items in the hashtable divided by total number of slots
-        # the load factor tells us how full the hash table is or isn't so we can decide if we need
-        # to resize or not.
         num_items = 0
         for i in self.hash_table:
             if i != None:
                 num_items += 1
-        return num_items / len(self.hash_table)
+        print(num_items / self.capacity)
+        return num_items / self.capacity
 
     def fnv1(self, key):
         """
@@ -64,17 +72,35 @@ class HashTable:
         #     hash = hash * FNV_prime
         #     hash = hash xor octet_of_data
         # return hash
-        pass
+        # implemented
+        fnv_offset_basis = 14695981039346656037
+        fnv_prime = 1099511628211
+        hashed_var = fnv_offset_basis
+        string_bytes = key.encode()
 
-    def djb2(self, key): # key will be a string
+        for b in sring_bytes:
+            hashed_var = hashed_var * fnv_prime
+            hashed_var = hashed_var ^ b
+
+        return hashed_var
+
+    def djb2(self, key):  # key will be a string
         """
         DJB2 hash, 32-bit
         Implement this, and/or FNV-1.
         """
-        hash = 5381
+        # one way to do it
+        my_hash = 5381
         for x in key:
-            hash = (( hash * 33) + ord(x))
-        return hash
+            my_hash = ((my_hash * 33) + ord(x))
+        return my_hash
+
+        # another way
+        # my_hash = 5381
+        # string_bytes = key.encode()
+
+        # for b in string_bytes:
+        #     my_hash = ((my_hash << 5) + my_hash) + b
 
     def hash_index(self, key):
         """
@@ -82,6 +108,7 @@ class HashTable:
         between within the storage capacity of the hash table.
         """
         # return self.fnv1(key) % self.capacity
+        # print("index = ", self.djb2(key) % self.capacity)
         return self.djb2(key) % self.capacity
 
     def put(self, key, value):
@@ -90,8 +117,23 @@ class HashTable:
         Hash collisions should be handled with Linked List Chaining.
         Implement this.
         """
-        # Your code here
-        self.hash_table[self.hash_index(key)] = value
+        if self.get_load_factor() > 0.7:
+            self.capacity = self.capacity * 2
+            old_table = self.hash_table
+            self.hash_table = [None] * self.capacity
+            for i in old_table:
+                curr = i.head
+                while curr != None:
+                    self.put(curr.key, curr.value)
+
+        node_to_insert = self.hash_table[self.hash_index(key)]
+        if node_to_insert is not None:
+            old_head = node_to_insert.head
+            node_to_insert.head = HashTableEntry(key, value)
+            node_to_insert.head.next = old_head
+        else:  # if None...
+            self.hash_table[self.hash_index(key)] = SinglyLinkedList(
+                HashTableEntry(key, value))
 
     def delete(self, key):
         """
@@ -99,12 +141,15 @@ class HashTable:
         Print a warning if the key is not found.
         Implement this.
         """
-        # Your code here
-        if self.hash_table[self.hash_index(key)] == None:
+        if self.hash_table[self.hash_index(key)] != None:
+            curr = self.hash_table[self.hash_index(key)].head
+            while curr != None:
+                # print("###", curr)
+                if curr.key == key:
+                    curr.value = None
+                    return
+                curr = curr.next
             print("key not found!")
-        else:
-            self.hash_table.pop(self.hash_index(key))
-
 
     def get(self, key):
         """
@@ -113,7 +158,15 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        return self.hash_table[self.hash_index(key)]
+        if self.hash_table[self.hash_index(key)] == None:
+            return None
+        elif self.hash_table[self.hash_index(key)] != None:
+            curr = self.hash_table[self.hash_index(key)].head
+            while curr != None:
+                if curr.key == key:
+                    return curr.value
+                curr = curr.next
+            return None
 
     def resize(self, new_capacity):
         """
@@ -127,16 +180,38 @@ class HashTable:
         # using the hash function
         # lower load factor means fewer collisions, so a better perfomring hash table
         # good rule of thumb is resize when the load factor is greater then .7
+
+        # make a new array, double size
+        # iterate thorugh old array and old linked lists
+        # insert into new array, same way we did in old array
         pass
 
 
-jackson = HashTable(10)
-jackson.put("potato", 1.2)
-print(jackson)
-jackson.delete("potato")
-jackson.delete("apple")
-print(jackson)
-# if __name__ == "__main__":
+# ----------------------------------
+if __name__ == "__main__":
+    ht = HashTable(8)
+
+    ht.put("key-0", "val-0")
+    ht.put("key-1", "val-1")
+    ht.put("key-2", "val-2")
+    ht.put("key-3", "val-3")
+    ht.put("key-4", "val-4")
+    ht.put("key-5", "val-5")
+    ht.put("key-6", "val-6")
+    ht.put("key-7", "val-7")
+    ht.put("key-8", "val-8")
+    ht.put("key-9", "val-9")
+    ht.get_load_factor()
+    ht.delete("key-7")
+    ht.delete("key-6")
+    ht.delete("key-5")
+    ht.delete("key-4")
+    ht.delete("key-3")
+    ht.delete("key-2")
+    ht.delete("key-1")
+    ht.delete("key-0")
+    return_value = ht.get("key-0")
+    print("$$$", return_value)
 #     ht = HashTable(8)
 
 #     ht.put("line_1", "'Twas brillig, and the slithy toves")
@@ -170,3 +245,68 @@ print(jackson)
 #         print(ht.get(f"line_{i}"))
 
 #     print("")
+# #-------------------------------------
+
+# jackson = HashTable(10)
+# jackson.put("howdy", 2)
+# jackson.put("hi", 2)
+# print(jackson)
+# jackson.delete("hi")
+# print(jackson)
+
+# jackson.delete("potato")
+# jackson.delete("apple")
+# print(jackson)
+
+# class SinglyLinkedList:
+#     def __init__(self):
+#         self.head = None
+
+#     def find(self, key):
+#         current = self.head
+#         while current is not None:
+#             if current.key == key:
+#                 return current # or the value if thats what you want
+#             else:
+#                 current = current.next
+#         return current
+
+#     def insert_at_head(self, key, value):
+#         #check if the key  is already in the linked list
+#         # find the node
+#             current = self.head
+#             while current is not None:
+#                 # if the key is found, change the value
+#                 if current.key == key:
+#                     current.value = value
+#                     # exit function immedietely
+#                     return
+#                 current = current.next
+#         # if we reach the end of the list, its not there
+#         # make a new node  and insert at head
+#             new_node = HashTableEntry(key, value)
+#             new_node.next = self.head
+#             self.head = new_node
+
+#     def insert_at_tail(self, key, value):
+#         #check if the key  is already in the linked list
+#         # find the node
+#             current = self.head
+#             while current is not None:
+#                 # if the key is found, change the value
+#                 if current.key == key:
+#                     current.value = value
+#                     # exit function immedietely
+#                     return
+#                 current = current.next
+#         # if we reach the end of the list, its not there
+#         # make a new node  and insert at tail
+#             new_node = HashTableEntry(key, value)
+#             new_node.next = self.head
+#             self.head = new_node
+
+#     def delete(self):
+#         pass
+
+# collision resolution iwth chaining, make a linked list work with hash table
+# resizing - up. don't worry about down, that's a stretch goal.
