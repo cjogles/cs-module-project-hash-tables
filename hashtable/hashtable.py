@@ -109,15 +109,14 @@ class HashTable:
         """
         if self.get_load_factor() > 0.7:
             self.resize(self.capacity * 2)
-        if self.hash_table[self.hash_index(key)] != None:
-            print("your in")
-            first_node = self.hash_table[self.hash_index(key)]
+        index = self.hash_index(key)
+        if self.hash_table[index] != None:
+            first_node = self.hash_table[index]
             node_to_insert = HashTableEntry(key, value)
             node_to_insert.next = first_node
-            self.hash_table[self.hash_index(key)] = node_to_insert
+            self.hash_table[index] = node_to_insert
         else:  # if None...
-            print("hello")
-            self.hash_table[self.hash_index(key)] = HashTableEntry(key, value)
+            self.hash_table[index] = HashTableEntry(key, value)
 
     def delete(self, key):
         """
@@ -158,16 +157,18 @@ class HashTable:
         Implement this.
         """
         new_table = HashTable(new_capacity)
-        for i in self.hash_table:
-            if i == None:
-                print("no nodes here!")
+        for i in range(len(self.hash_table)):
+            if self.hash_table[i] == None:
+                continue
             else:
-                current_node = i
+                current_node = self.hash_table[i]
                 while current_node != None:
                     new_table.put(current_node.key, current_node.value)
                     current_node = current_node.next
-        self.hash_table = new_table
+        self.hash_table = new_table.hash_table
         self.capacity = new_capacity
+
+
 
 
 # ----------------------------------
