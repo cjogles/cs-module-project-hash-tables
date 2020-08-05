@@ -11,15 +11,6 @@ class HashTableEntry:
     def __repr__(self):
         return f"key = {self.key}, value = {self.value}, next = {self.next}"
 
-
-class SinglyLinkedList:
-    def __init__(self, first_node=None):
-        self.head = first_node
-
-    def __repr__(self):
-        return f"head = {self.head}"
-
-
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
 
@@ -58,7 +49,6 @@ class HashTable:
         for i in self.hash_table:
             if i != None:
                 num_items += 1
-        print(num_items / self.capacity)
         return num_items / self.capacity
 
     def fnv1(self, key):
@@ -118,22 +108,16 @@ class HashTable:
         Implement this.
         """
         if self.get_load_factor() > 0.7:
-            self.capacity = self.capacity * 2
-            old_table = self.hash_table
-            self.hash_table = [None] * self.capacity
-            for i in old_table:
-                curr = i.head
-                while curr != None:
-                    self.put(curr.key, curr.value)
-
-        node_to_insert = self.hash_table[self.hash_index(key)]
-        if node_to_insert is not None:
-            old_head = node_to_insert.head
-            node_to_insert.head = HashTableEntry(key, value)
-            node_to_insert.head.next = old_head
+            self.resize(self.capacity * 2)
+        if self.hash_table[self.hash_index(key)] != None:
+            print("your in")
+            first_node = self.hash_table[self.hash_index(key)]
+            node_to_insert = HashTableEntry(key, value)
+            node_to_insert.next = first_node
+            self.hash_table[self.hash_index(key)] = node_to_insert
         else:  # if None...
-            self.hash_table[self.hash_index(key)] = SinglyLinkedList(
-                HashTableEntry(key, value))
+            print("hello")
+            self.hash_table[self.hash_index(key)] = HashTableEntry(key, value)
 
     def delete(self, key):
         """
@@ -142,9 +126,8 @@ class HashTable:
         Implement this.
         """
         if self.hash_table[self.hash_index(key)] != None:
-            curr = self.hash_table[self.hash_index(key)].head
+            curr = self.hash_table[self.hash_index(key)]
             while curr != None:
-                # print("###", curr)
                 if curr.key == key:
                     curr.value = None
                     return
@@ -161,7 +144,7 @@ class HashTable:
         if self.hash_table[self.hash_index(key)] == None:
             return None
         elif self.hash_table[self.hash_index(key)] != None:
-            curr = self.hash_table[self.hash_index(key)].head
+            curr = self.hash_table[self.hash_index(key)]
             while curr != None:
                 if curr.key == key:
                     return curr.value
@@ -174,17 +157,17 @@ class HashTable:
         rehashes all key/value pairs.
         Implement this.
         """
-        # Your code here
-        # double the array size, once the load factor gets close to 1 or above
-        # then re-insert all of the items from the old hashtable into the new hashtable
-        # using the hash function
-        # lower load factor means fewer collisions, so a better perfomring hash table
-        # good rule of thumb is resize when the load factor is greater then .7
-
-        # make a new array, double size
-        # iterate thorugh old array and old linked lists
-        # insert into new array, same way we did in old array
-        pass
+        new_table = HashTable(new_capacity)
+        for i in self.hash_table:
+            if i == None:
+                print("no nodes here!")
+            else:
+                current_node = i
+                while current_node != None:
+                    new_table.put(current_node.key, current_node.value)
+                    current_node = current_node.next
+        self.hash_table = new_table
+        self.capacity = new_capacity
 
 
 # ----------------------------------
@@ -201,15 +184,15 @@ if __name__ == "__main__":
     ht.put("key-7", "val-7")
     ht.put("key-8", "val-8")
     ht.put("key-9", "val-9")
-    ht.get_load_factor()
-    ht.delete("key-7")
-    ht.delete("key-6")
-    ht.delete("key-5")
-    ht.delete("key-4")
-    ht.delete("key-3")
-    ht.delete("key-2")
-    ht.delete("key-1")
-    ht.delete("key-0")
+    # ht.get_load_factor()
+    # ht.delete("key-7")
+    # ht.delete("key-6")
+    # ht.delete("key-5")
+    # ht.delete("key-4")
+    # ht.delete("key-3")
+    # ht.delete("key-2")
+    # ht.delete("key-1")
+    # ht.delete("key-0")
     return_value = ht.get("key-0")
     print("$$$", return_value)
 #     ht = HashTable(8)
@@ -257,6 +240,17 @@ if __name__ == "__main__":
 # jackson.delete("potato")
 # jackson.delete("apple")
 # print(jackson)
+
+
+
+
+
+
+
+
+
+
+
 
 # class SinglyLinkedList:
 #     def __init__(self):
