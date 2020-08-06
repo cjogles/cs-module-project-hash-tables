@@ -7,6 +7,11 @@ def word_count(s):
     # Your code here
     # first lowercase everything in string, and ignore characters I don't care about by deleting them
     my_string = s.lower()
+    unwanted_chars = []
+    # put all the unwanted chars in an array,
+    # loop through the array and for each character,
+    # now I can do re.sub to remove. 
+    # thats the prettier version
     my_string = re.sub("\"", "", my_string)
     my_string = re.sub("\[", "", my_string)
     my_string = re.sub("\]", "", my_string)
