@@ -1,10 +1,11 @@
 def no_dups(s):
-    # Your code here
-    my_hash_table = {}
-    my_string = s.split(" ")
+    my_hash_table = {}     
+    my_string = s.split(" ") 
     result = []
-    for i in my_string:
+    for i in my_string: 
         if i not in my_hash_table:
+            # python dictionary is a hashtable data structure
+            # that keeps things in order! That's nice.
             my_hash_table[i] = i
         else:
             continue
